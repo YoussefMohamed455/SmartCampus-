@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Configuration;
 import java.util.List;
 
 @Configuration
+@OpenAPIDefinition(
 public OpenAPI customOpenAPI() {
     Server server = new Server();
     // ⚠️ حط رابط مشروعك هنا بالظبط زي ما هو مكتوب
