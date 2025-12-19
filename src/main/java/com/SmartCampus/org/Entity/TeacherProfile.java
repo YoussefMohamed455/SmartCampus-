@@ -15,11 +15,11 @@ import java.util.List;
 public class TeacherProfile {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long teacherId;
 
     @OneToOne
-    @MapsId
-    @JoinColumn(name = "teacher_id")
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
 
     // These were missing and caused your error
