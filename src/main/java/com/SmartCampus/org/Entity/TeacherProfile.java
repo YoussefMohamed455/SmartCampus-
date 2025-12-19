@@ -16,6 +16,7 @@ public class TeacherProfile {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "teacher_id")
     private Long teacherId;
 
     @OneToOne
