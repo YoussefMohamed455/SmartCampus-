@@ -19,7 +19,7 @@ public class User {
     private Long id;
 
     @Column(unique = true, nullable = false)
-    private String username; // MapStruct was looking for this!
+    private String username;
 
     @Column(unique = true, nullable = false)
     private String email;
@@ -30,7 +30,7 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    // Relationships
+
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     private StudentProfile studentProfile;
 

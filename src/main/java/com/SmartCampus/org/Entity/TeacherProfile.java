@@ -23,7 +23,6 @@ public class TeacherProfile {
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
 
-    // These were missing and caused your error
     private String firstName;
     private String lastName;
     private String department;

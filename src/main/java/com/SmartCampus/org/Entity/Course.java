@@ -26,6 +26,7 @@ public class Course {
 
     private Integer credits;
 
+
     // You can keep 'department' if you want, but ensure DTO has it if you want to pass it
     private String department;
 

@@ -32,8 +32,7 @@ public class StudentProfile {
     @OneToMany(mappedBy = "studentProfile", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Attendance> attendances;
 
-    // --- FIX IS HERE ---
-    // Change "studentProfile" to "student" to match BookIssue.java
+
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL)
     private List<BookIssue> bookIssues;
 }

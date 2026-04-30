@@ -11,7 +11,7 @@ import io.swagger.v3.oas.annotations.servers.Server; // <-- 1. Added this missin
 @Configuration
 @OpenAPIDefinition(
         servers = {
-                @Server(url = "https://just-presence-production-79e0.up.railway.app", description = "Default Server URL")
+                @Server(url = "http://localhost:8080", description = "Default Server URL")
         }, // <-- 2. Added this missing comma
         info = @Info(title = "Smart Campus API", version = "1.0"),
         security = { @SecurityRequirement(name = "bearerAuth") } // <-- 3. Added curly braces {}

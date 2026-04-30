@@ -22,7 +22,6 @@ public class ExamResult {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "student_id", nullable = false)
     private StudentProfile student;
-
     private Double marksObtained;
     private String grade; // A, B, C, F, etc.
 }
