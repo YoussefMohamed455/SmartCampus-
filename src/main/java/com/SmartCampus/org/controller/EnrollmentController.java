@@ -12,6 +12,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/enrollments")
+@CrossOrigin
 public class EnrollmentController {
 
     private final EnrollmentService enrollmentService;

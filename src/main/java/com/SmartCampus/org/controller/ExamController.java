@@ -13,6 +13,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/exams")
+@CrossOrigin
 public class ExamController {
 
     private final ExamService examService;

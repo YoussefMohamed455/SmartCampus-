@@ -11,7 +11,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/students") // This is the base URL for all endpoints below
+@RequestMapping("/api/students")// This is the base URL for all endpoints below
+@CrossOrigin
 public class StudentController {
 
     private final StudentService studentService;

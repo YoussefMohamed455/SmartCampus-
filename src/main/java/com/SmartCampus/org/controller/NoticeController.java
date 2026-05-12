@@ -12,6 +12,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/notices")
+@CrossOrigin
 public class NoticeController {
 
     private final NoticeService noticeService;
