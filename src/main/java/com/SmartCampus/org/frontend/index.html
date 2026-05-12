@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SmartCampus</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- Toast -->
+<div id="toast-container"></div>
+
+<!-- Auth Screen -->
+<div id="auth-screen">
+  <div class="auth-bg"></div>
+  <div class="auth-grid"></div>
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="auth-logo-icon">🎓</div>
+      <div class="auth-logo-text">Smart<span>Campus</span></div>
+    </div>
+    <div id="login-form">
+      <h2>Welcome back</h2>
+      <p>Sign in to your campus portal</p>
+      <div class="field">
+        <label>Email</label>
+        <input type="email" id="login-email" placeholder="you@university.edu" autocomplete="email">
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password">
+      </div>
+      <button class="btn btn-primary btn-full" id="login-btn" onclick="doLogin()">Sign In</button>
+      <div class="auth-toggle">Don't have an account? <a onclick="showRegister()">Register</a></div>
+    </div>
+    <div id="register-form" style="display:none">
+      <h2>Create account</h2>
+      <p>Join the campus portal</p>
+      <div class="field">
+        <label>Username</label>
+        <input type="text" id="reg-username" placeholder="johndoe">
+      </div>
+      <div class="field">
+        <label>Email</label>
+        <input type="email" id="reg-email" placeholder="you@university.edu">
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="reg-password" placeholder="Min. 6 characters">
+      </div>
+      <div class="field">
+        <label>Role</label>
+        <select id="reg-role">
+          <option value="STUDENT">Student</option>
+          <option value="TEACHER">Teacher</option>
+          <option value="ADMIN">Admin</option>
+        </select>
+      </div>
+      <button class="btn btn-primary btn-full" onclick="doRegister()">Create Account</button>
+      <div class="auth-toggle">Already have an account? <a onclick="showLogin()">Sign in</a></div>
+    </div>
+  </div>
+</div>
+
+<!-- Sidebar overlay for mobile -->
+<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+<!-- Main App -->
+<div id="app">
+  <div class="layout">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-logo">
+        <div class="sidebar-logo-icon">🎓</div>
+        <div class="sidebar-logo-text">Smart<span>Campus</span></div>
+      </div>
+      <nav class="sidebar-nav" id="sidebar-nav"></nav>
+      <div class="sidebar-footer">
+        <div class="user-chip">
+          <div class="user-avatar" id="user-avatar">?</div>
+          <div class="user-info">
+            <div class="user-name" id="user-name-display">Loading...</div>
+            <div class="user-role" id="user-role-display">...</div>
+          </div>
+          <button class="logout-btn" onclick="doLogout()" title="Sign out">⬡</button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main">
+      <div class="topbar">
+        <div style="display:flex;align-items:center;gap:14px">
+          <button class="hamburger" onclick="openSidebar()">☰</button>
+          <div class="topbar-title" id="topbar-title">Dashboard</div>
+        </div>
+        <div class="topbar-right">
+          <span class="badge" id="topbar-badge">...</span>
+        </div>
+      </div>
+
+      <!-- Dashboard -->
+      <div class="page active" id="page-dashboard">
+        <div class="page-header">
+          <h1 id="dash-greeting">Good morning 👋</h1>
+          <p>Here's what's happening on campus today</p>
+        </div>
+        <div class="stats-grid" id="dash-stats"></div>
+        <div class="dash-grid">
+          <div>
+            <div class="table-card">
+              <div class="table-card-header"><h3>📋 Recent Notices</h3></div>
+              <div style="padding:16px"><div class="notice-list" id="dash-notices"><div class="empty-state"><div class="empty-icon">📭</div><p>No notices yet</p></div></div></div>
+            </div>
+          </div>
+          <div>
+            <div class="table-card">
+              <div class="table-card-header"><h3>📆 Quick Info</h3></div>
+              <div style="padding:16px" id="dash-quick"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Students -->
+      <div class="page" id="page-students">
+        <div class="page-header">
+          <h1>Students</h1>
+          <p>Manage student profiles and information</p>
+        </div>
+        <div class="filter-bar">
+          <input type="text" id="student-search" placeholder="🔍 Search students..." oninput="filterStudents()">
+          <button class="btn btn-primary" onclick="openModal('modal-student')">+ Add Student</button>
+        </div>
+        <div class="table-card">
+          <div class="table-wrapper">
+            <table>
+              <thead><tr><th>#</th><th>Name</th><th>Roll No</th><th>Department</th><th>Batch</th><th>Actions</th></tr></thead>
+              <tbody id="student-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Teachers -->
+      <div class="page" id="page-teachers">
+        <div class="page-header">
+          <h1>Teachers</h1>
+          <p>Manage faculty profiles</p>
+        </div>
+        <div class="filter-bar">
+          <input type="text" id="teacher-search" placeholder="🔍 Search teachers..." oninput="filterTeachers()">
+          <button class="btn btn-primary" onclick="openModal('modal-teacher')">+ Add Teacher</button>
+        </div>
+        <div class="table-card">
+          <div class="table-wrapper">
+            <table>
+              <thead><tr><th>#</th><th>Name</th><th>Department</th><th>Qualification</th><th>Phone</th><th>Actions</th></tr></thead>
+              <tbody id="teacher-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Courses -->
+      <div class="page" id="page-courses">
+        <div class="page-header">
+          <h1>Courses</h1>
+          <p>Manage academic courses</p>
+        </div>
+        <div class="filter-bar">
+          <input type="text" id="course-search" placeholder="🔍 Search courses..." oninput="filterCourses()">
+          <button class="btn btn-primary" onclick="openModal('modal-course')">+ Add Course</button>
+        </div>
+        <div class="table-card">
+          <div class="table-wrapper">
+            <table>
+              <thead><tr><th>Code</th><th>Name</th><th>Department</th><th>Credits</th><th>Teacher</th><th>Actions</th></tr></thead>
+              <tbody id="course-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Attendance -->
+      <div class="page" id="page-attendance">
+        <div class="page-header">
+          <h1>Attendance</h1>
+          <p>Mark and view attendance records</p>
+        </div>
+        <div class="tabs">
+          <div class="tab active" onclick="switchTab(this,'att-mark')">Mark Attendance</div>
+          <div class="tab" onclick="switchTab(this,'att-view')">View Records</div>
+        </div>
+        <div class="tab-panel active" id="att-mark">
+          <div class="table-card">
+            <div class="table-card-header"><h3>Mark Attendance</h3><button class="btn btn-primary btn-sm" onclick="openModal('modal-attendance')">+ Mark</button></div>
+            <div style="padding:20px;color:var(--text2);font-size:.9rem">Select a course and date to mark student attendance.</div>
+          </div>
+        </div>
+        <div class="tab-panel" id="att-view">
+          <div class="filter-bar">
+            <input type="number" id="att-student-id" placeholder="Student ID">
+            <button class="btn btn-secondary" onclick="loadStudentAttendance()">Load Records</button>
+          </div>
+          <div class="table-card">
+            <div class="table-wrapper">
+              <table>
+                <thead><tr><th>Date</th><th>Course ID</th><th>Status</th></tr></thead>
+                <tbody id="att-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Exams -->
+      <div class="page" id="page-exams">
+        <div class="page-header">
+          <h1>Exams &amp; Results</h1>
+          <p>Manage examinations and student grades</p>
+        </div>
+        <div class="tabs">
+          <div class="tab active" onclick="switchTab(this,'exam-list')">Exams</div>
+          <div class="tab" onclick="switchTab(this,'exam-results')">Results</div>
+        </div>
+        <div class="tab-panel active" id="exam-list">
+          <div class="filter-bar">
+            <input type="number" id="exam-course-id" placeholder="Course ID">
+            <button class="btn btn-secondary" onclick="loadExams()">Load Exams</button>
+            <button class="btn btn-primary" onclick="openModal('modal-exam')">+ Add Exam</button>
+          </div>
+          <div class="table-card">
+            <div class="table-wrapper">
+              <table>
+                <thead><tr><th>ID</th><th>Exam Name</th><th>Course</th><th>Date</th><th>Total Marks</th></tr></thead>
+                <tbody id="exam-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div class="tab-panel" id="exam-results">
+          <div class="filter-bar">
+            <input type="number" id="result-student-id" placeholder="Student ID">
+            <button class="btn btn-secondary" onclick="loadResults()">Load Results</button>
+            <button class="btn btn-primary" onclick="openModal('modal-result')">+ Add Result</button>
+          </div>
+          <div class="table-card">
+            <div class="table-wrapper">
+              <table>
+                <thead><tr><th>Exam ID</th><th>Marks Obtained</th><th>Grade</th></tr></thead>
+                <tbody id="result-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Library -->
+      <div class="page" id="page-library">
+        <div class="page-header">
+          <h1>Library</h1>
+          <p>Book catalogue and issue management</p>
+        </div>
+        <div class="tabs">
+          <div class="tab active" onclick="switchTab(this,'lib-books')">Books</div>
+          <div class="tab" onclick="switchTab(this,'lib-issues')">Issued Books</div>
+        </div>
+        <div class="tab-panel active" id="lib-books">
+          <div class="filter-bar">
+            <input type="text" id="book-search" placeholder="🔍 Search books..." oninput="filterBooks()">
+            <button class="btn btn-primary" onclick="openModal('modal-book')">+ Add Book</button>
+          </div>
+          <div class="table-card">
+            <div class="table-wrapper">
+              <table>
+                <thead><tr><th>ISBN</th><th>Title</th><th>Author</th><th>Total Copies</th><th>Actions</th></tr></thead>
+                <tbody id="book-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div class="tab-panel" id="lib-issues">
+          <div class="filter-bar">
+            <input type="number" id="issue-student-id" placeholder="Student ID">
+            <button class="btn btn-secondary" onclick="loadIssues()">Load Issues</button>
+            <button class="btn btn-primary" onclick="openModal('modal-issue')">+ Issue Book</button>
+          </div>
+          <div class="table-card">
+            <div class="table-wrapper">
+              <table>
+                <thead><tr><th>Issue ID</th><th>Book ID</th><th>Issue Date</th><th>Due Date</th><th>Status</th><th>Action</th></tr></thead>
+                <tbody id="issue-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Canteen -->
+      <div class="page" id="page-canteen">
+        <div class="page-header">
+          <h1>Canteen</h1>
+          <p>Browse menu and place orders</p>
+        </div>
+        <div class="tabs">
+          <div class="tab active" onclick="switchTab(this,'can-menu')">Menu</div>
+          <div class="tab" onclick="switchTab(this,'can-orders')">My Orders</div>
+        </div>
+        <div class="tab-panel active" id="can-menu">
+          <div class="filter-bar">
+            <button class="btn btn-primary" onclick="openModal('modal-menu-item')">+ Add Item</button>
+          </div>
+          <div class="menu-grid" id="menu-grid"></div>
+        </div>
+        <div class="tab-panel" id="can-orders">
+          <div class="filter-bar">
+            <input type="number" id="order-student-id" placeholder="Student ID">
+            <button class="btn btn-secondary" onclick="loadOrders()">Load Orders</button>
+            <button class="btn btn-primary" onclick="openModal('modal-order')">+ Place Order</button>
+          </div>
+          <div class="table-card">
+            <div class="table-wrapper">
+              <table>
+                <thead><tr><th>Order ID</th><th>Date</th><th>Total</th><th>Items</th></tr></thead>
+                <tbody id="order-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Fees -->
+      <div class="page" id="page-fees">
+        <div class="page-header">
+          <h1>Fee Payments</h1>
+          <p>Track and manage student fee payments</p>
+        </div>
+        <div class="filter-bar">
+          <input type="number" id="fee-student-id" placeholder="Student ID">
+          <button class="btn btn-secondary" onclick="loadFees()">Load Payments</button>
+          <button class="btn btn-primary" onclick="openModal('modal-fee')">+ Record Payment</button>
+        </div>
+        <div class="table-card">
+          <div class="table-wrapper">
+            <table>
+              <thead><tr><th>ID</th><th>Student ID</th><th>Amount</th><th>Type</th><th>Date</th><th>Reference</th><th>Status</th></tr></thead>
+              <tbody id="fee-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Notices -->
+      <div class="page" id="page-notices">
+        <div class="page-header">
+          <h1>Notices</h1>
+          <p>Campus announcements and updates</p>
+        </div>
+        <div class="filter-bar">
+          <button class="btn btn-primary" onclick="openModal('modal-notice')">+ Post Notice</button>
+        </div>
+        <div class="notice-list" id="notice-list-full"></div>
+      </div>
+
+      <!-- Schedule -->
+      <div class="page" id="page-schedule">
+        <div class="page-header">
+          <h1>Class Schedule</h1>
+          <p>Weekly timetable view</p>
+        </div>
+        <div class="filter-bar">
+          <input type="number" id="sched-course-id" placeholder="Course ID">
+          <button class="btn btn-secondary" onclick="loadSchedule()">Load Schedule</button>
+          <button class="btn btn-primary" onclick="openModal('modal-schedule')">+ Add Slot</button>
+        </div>
+        <div class="schedule-grid" id="schedule-grid"></div>
+      </div>
+
+      <!-- Enrollments -->
+      <div class="page" id="page-enrollments">
+        <div class="page-header">
+          <h1>Enrollments</h1>
+          <p>Manage student course enrollments</p>
+        </div>
+        <div class="filter-bar">
+          <input type="number" id="enroll-student-id" placeholder="Student ID">
+          <button class="btn btn-secondary" onclick="loadEnrollments()">Load Enrollments</button>
+          <button class="btn btn-primary" onclick="openModal('modal-enrollment')">+ Enroll Student</button>
+        </div>
+        <div class="table-card">
+          <div class="table-wrapper">
+            <table>
+              <thead><tr><th>ID</th><th>Student ID</th><th>Course ID</th><th>Date</th></tr></thead>
+              <tbody id="enroll-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Users (Admin only) -->
+      <div class="page" id="page-users">
+        <div class="page-header">
+          <h1>User Management</h1>
+          <p>Manage all system users</p>
+        </div>
+        <div class="table-card">
+          <div class="table-card-header"><h3>All Users</h3><button class="btn btn-sm btn-secondary" onclick="loadUsers()">🔄 Refresh</button></div>
+          <div class="table-wrapper">
+            <table>
+              <thead><tr><th>ID</th><th>Username</th><th>Email</th><th>Role</th><th>Actions</th></tr></thead>
+              <tbody id="user-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- ─────────── MODALS ─────────── -->
+
+<!-- Student Modal -->
+<div class="modal-overlay" id="modal-student">
+  <div class="modal">
+    <h3>➕ Add Student</h3>
+    <div class="form-grid">
+      <div class="field"><label>First Name</label><input id="s-fname" placeholder="John"></div>
+      <div class="field"><label>Last Name</label><input id="s-lname" placeholder="Doe"></div>
+      <div class="field"><label>Department</label><input id="s-dept" placeholder="Computer Science"></div>
+      <div class="field"><label>Batch</label><input id="s-batch" placeholder="2024"></div>
+      <div class="field"><label>Roll No</label><input id="s-roll" placeholder="CS-001"></div>
+      <div class="field"><label>User ID</label><input type="number" id="s-uid" placeholder="1"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-student')">Cancel</button>
+      <button class="btn btn-primary" onclick="createStudent()">Create Student</button>
+    </div>
+  </div>
+</div>
+
+<!-- Teacher Modal -->
+<div class="modal-overlay" id="modal-teacher">
+  <div class="modal">
+    <h3>➕ Add Teacher</h3>
+    <div class="form-grid">
+      <div class="field"><label>First Name</label><input id="t-fname" placeholder="Jane"></div>
+      <div class="field"><label>Last Name</label><input id="t-lname" placeholder="Smith"></div>
+      <div class="field"><label>Department</label><input id="t-dept" placeholder="Mathematics"></div>
+      <div class="field"><label>Qualification</label><input id="t-qual" placeholder="PhD"></div>
+      <div class="field"><label>Phone</label><input id="t-phone" placeholder="01012345678"></div>
+      <div class="field"><label>User ID</label><input type="number" id="t-uid" placeholder="2"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-teacher')">Cancel</button>
+      <button class="btn btn-primary" onclick="createTeacher()">Create Teacher</button>
+    </div>
+  </div>
+</div>
+
+<!-- Course Modal -->
+<div class="modal-overlay" id="modal-course">
+  <div class="modal">
+    <h3>➕ Add Course</h3>
+    <div class="form-grid">
+      <div class="field field-full"><label>Course Name</label><input id="c-name" placeholder="Introduction to Programming"></div>
+      <div class="field"><label>Course Code</label><input id="c-code" placeholder="CS101"></div>
+      <div class="field"><label>Credits</label><input type="number" id="c-credits" placeholder="3"></div>
+      <div class="field"><label>Department</label><input id="c-dept" placeholder="Computer Science"></div>
+      <div class="field"><label>Teacher ID</label><input type="number" id="c-tid" placeholder="1"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-course')">Cancel</button>
+      <button class="btn btn-primary" onclick="createCourse()">Create Course</button>
+    </div>
+  </div>
+</div>
+
+<!-- Attendance Modal -->
+<div class="modal-overlay" id="modal-attendance">
+  <div class="modal">
+    <h3>📋 Mark Attendance</h3>
+    <div class="form-grid">
+      <div class="field"><label>Student ID</label><input type="number" id="a-sid" placeholder="1"></div>
+      <div class="field"><label>Course ID</label><input type="number" id="a-cid" placeholder="1"></div>
+      <div class="field"><label>Date</label><input type="date" id="a-date"></div>
+      <div class="field"><label>Status</label>
+        <select id="a-status">
+          <option value="PRESENT">Present</option>
+          <option value="ABSENT">Absent</option>
+          <option value="LATE">Late</option>
+          <option value="EXCUSED">Excused</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-attendance')">Cancel</button>
+      <button class="btn btn-primary" onclick="markAttendance()">Mark Attendance</button>
+    </div>
+  </div>
+</div>
+
+<!-- Exam Modal -->
+<div class="modal-overlay" id="modal-exam">
+  <div class="modal">
+    <h3>📝 Add Exam</h3>
+    <div class="form-grid">
+      <div class="field field-full"><label>Exam Name</label><input id="ex-name" placeholder="Midterm Exam"></div>
+      <div class="field"><label>Course ID</label><input type="number" id="ex-cid" placeholder="1"></div>
+      <div class="field"><label>Total Marks</label><input type="number" id="ex-marks" placeholder="100"></div>
+      <div class="field field-full"><label>Exam Date</label><input type="date" id="ex-date"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-exam')">Cancel</button>
+      <button class="btn btn-primary" onclick="createExam()">Create Exam</button>
+    </div>
+  </div>
+</div>
+
+<!-- Result Modal -->
+<div class="modal-overlay" id="modal-result">
+  <div class="modal">
+    <h3>📊 Add Result</h3>
+    <div class="form-grid">
+      <div class="field"><label>Exam ID</label><input type="number" id="r-eid" placeholder="1"></div>
+      <div class="field"><label>Student ID</label><input type="number" id="r-sid" placeholder="1"></div>
+      <div class="field field-full"><label>Marks Obtained</label><input type="number" id="r-marks" placeholder="85"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-result')">Cancel</button>
+      <button class="btn btn-primary" onclick="addResult()">Add Result</button>
+    </div>
+  </div>
+</div>
+
+<!-- Book Modal -->
+<div class="modal-overlay" id="modal-book">
+  <div class="modal">
+    <h3>📚 Add Book</h3>
+    <div class="form-grid">
+      <div class="field field-full"><label>Title</label><input id="b-title" placeholder="Data Structures and Algorithms"></div>
+      <div class="field"><label>Author</label><input id="b-author" placeholder="Thomas Cormen"></div>
+      <div class="field"><label>ISBN</label><input id="b-isbn" placeholder="978-0262046305"></div>
+      <div class="field field-full"><label>Total Copies</label><input type="number" id="b-copies" placeholder="5"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-book')">Cancel</button>
+      <button class="btn btn-primary" onclick="addBook()">Add Book</button>
+    </div>
+  </div>
+</div>
+
+<!-- Issue Modal -->
+<div class="modal-overlay" id="modal-issue">
+  <div class="modal">
+    <h3>📖 Issue Book</h3>
+    <div class="form-grid">
+      <div class="field"><label>Book ID</label><input type="number" id="i-bid" placeholder="1"></div>
+      <div class="field"><label>Student ID</label><input type="number" id="i-sid" placeholder="1"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-issue')">Cancel</button>
+      <button class="btn btn-primary" onclick="issueBook()">Issue Book</button>
+    </div>
+  </div>
+</div>
+
+<!-- Menu Item Modal -->
+<div class="modal-overlay" id="modal-menu-item">
+  <div class="modal">
+    <h3>🍽️ Add Menu Item</h3>
+    <div class="form-grid">
+      <div class="field field-full"><label>Item Name</label><input id="mi-name" placeholder="Grilled Chicken Sandwich"></div>
+      <div class="field"><label>Price (EGP)</label><input type="number" id="mi-price" placeholder="45"></div>
+      <div class="field"><label>Available</label>
+        <select id="mi-avail">
+          <option value="true">Yes</option>
+          <option value="false">No</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-menu-item')">Cancel</button>
+      <button class="btn btn-primary" onclick="addMenuItem()">Add Item</button>
+    </div>
+  </div>
+</div>
+
+<!-- Order Modal -->
+<div class="modal-overlay" id="modal-order">
+  <div class="modal">
+    <h3>🛒 Place Order</h3>
+    <div class="field"><label>Student ID</label><input type="number" id="o-sid" placeholder="1"></div>
+    <div id="order-items-list"></div>
+    <button class="btn btn-secondary btn-sm" onclick="addOrderItem()" style="margin-top:8px">+ Add Item</button>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-order')">Cancel</button>
+      <button class="btn btn-primary" onclick="placeOrder()">Place Order</button>
+    </div>
+  </div>
+</div>
+
+<!-- Fee Modal -->
+<div class="modal-overlay" id="modal-fee">
+  <div class="modal">
+    <h3>💳 Record Payment</h3>
+    <div class="form-grid">
+      <div class="field"><label>Student ID</label><input type="number" id="f-sid" placeholder="1"></div>
+      <div class="field"><label>Amount (EGP)</label><input type="number" id="f-amount" placeholder="5000"></div>
+      <div class="field field-full"><label>Payment Type</label>
+        <select id="f-type">
+          <option>Tuition Fee</option>
+          <option>Library Fee</option>
+          <option>Lab Fee</option>
+          <option>Hostel Fee</option>
+          <option>Exam Fee</option>
+        </select>
+      </div>
+      <div class="field field-full"><label>Transaction Reference</label><input id="f-ref" placeholder="TXN-2024-001"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-fee')">Cancel</button>
+      <button class="btn btn-primary" onclick="recordPayment()">Record Payment</button>
+    </div>
+  </div>
+</div>
+
+<!-- Notice Modal -->
+<div class="modal-overlay" id="modal-notice">
+  <div class="modal">
+    <h3>📢 Post Notice</h3>
+    <div class="field"><label>Title</label><input id="n-title" placeholder="Campus Closure Notice"></div>
+    <div class="field"><label>Content</label><textarea id="n-content" rows="4" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;color:var(--text);font-family:var(--font-body);font-size:.9rem;resize:vertical" placeholder="Write your notice here..."></textarea></div>
+    <div class="field"><label>Posted By (Teacher ID)</label><input type="number" id="n-tid" placeholder="1"></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-notice')">Cancel</button>
+      <button class="btn btn-primary" onclick="postNotice()">Post Notice</button>
+    </div>
+  </div>
+</div>
+
+<!-- Schedule Modal -->
+<div class="modal-overlay" id="modal-schedule">
+  <div class="modal">
+    <h3>📅 Add Schedule Slot</h3>
+    <div class="form-grid">
+      <div class="field"><label>Course ID</label><input type="number" id="sc-cid" placeholder="1"></div>
+      <div class="field"><label>Teacher ID</label><input type="number" id="sc-tid" placeholder="1"></div>
+      <div class="field"><label>Day</label>
+        <select id="sc-day">
+          <option>MONDAY</option><option>TUESDAY</option><option>WEDNESDAY</option>
+          <option>THURSDAY</option><option>FRIDAY</option><option>SATURDAY</option><option>SUNDAY</option>
+        </select>
+      </div>
+      <div class="field"><label>Room</label><input id="sc-room" placeholder="A-101"></div>
+      <div class="field"><label>Start Time</label><input type="time" id="sc-start"></div>
+      <div class="field"><label>End Time</label><input type="time" id="sc-end"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-schedule')">Cancel</button>
+      <button class="btn btn-primary" onclick="addSchedule()">Add Slot</button>
+    </div>
+  </div>
+</div>
+
+<!-- Enrollment Modal -->
+<div class="modal-overlay" id="modal-enrollment">
+  <div class="modal">
+    <h3>📌 Enroll Student</h3>
+    <div class="form-grid">
+      <div class="field"><label>Student ID</label><input type="number" id="en-sid" placeholder="1"></div>
+      <div class="field"><label>Course ID</label><input type="number" id="en-cid" placeholder="1"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-enrollment')">Cancel</button>
+      <button class="btn btn-primary" onclick="enrollStudent()">Enroll</button>
+    </div>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
